@@ -86,6 +86,7 @@ sessions = {}
 class InterviewRequest(BaseModel):
     sessionId: str
     candidateId: str | None = None
+    candidate: dict | None = None
     message: str | None = None
 
 
@@ -483,27 +484,29 @@ def interview(request: InterviewRequest):
 
     if session_id not in sessions:
 
-        if not request.candidateId:
+        if request.candidate is None and not request.candidateId:
 
             return {
-                "reply": "candidateId is required to start the interview.",
+                "reply": "candidate or candidateId is required to start the interview.",
                 "done": False
             }
 
         # -------------------------------------------------
-        # FIND CANDIDATE
+        # RESOLVE CANDIDATE
         # -------------------------------------------------
 
-        candidate = None
+        candidate = request.candidate
 
-        for item in candidates:
+        if candidate is None:
 
-            member = item.get("member", {})
+            for item in candidates:
 
-            if member.get("id") == request.candidateId:
+                member = item.get("member", {})
 
-                candidate = item
-                break
+                if member.get("id") == request.candidateId:
+
+                    candidate = item
+                    break
 
         # -------------------------------------------------
         # CANDIDATE NOT FOUND
@@ -565,8 +568,6 @@ def interview(request: InterviewRequest):
             "reply": question,
             "done": False
         }
-
-    # =====================================================
     # EXISTING INTERVIEW
     # =====================================================
 
