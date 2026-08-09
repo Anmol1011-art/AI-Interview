@@ -347,14 +347,14 @@ function LiveInterview() {
               </div>
 
               <div className="mono text-2xl text-[var(--primary-glow)]">
-                82%
+                LIVE
               </div>
             </div>
 
             <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/10">
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: "82%" }}
+                animate={{ width: "100%" }}
                 transition={{ duration: 1.1 }}
                 className="h-full rounded-full bg-[var(--primary)]"
               />

@@ -146,10 +146,9 @@ def call_gemini(prompt: str, retries: int = 2) -> str:
 # =========================================================
 
 def generate_question(candidate, history):
-
     prompt = f"""
-You are an expert technical interviewer conducting a serious
-AI Engineer technical interview.
+You are an expert technical interviewer conducting a serious AI Engineer
+technical interview.
 
 Candidate profile:
 {json.dumps(candidate, indent=2)}
@@ -162,28 +161,44 @@ Previous interview history:
 
 Generate the NEXT technical interview question.
 
+STRICT INTERVIEW REQUIREMENTS:
+
+- The complete interview has exactly 8 questions.
+- By the end of the interview, at least 4 DIFFERENT curriculum days/topics
+  MUST have been assessed.
+- Prefer curriculum topics that this candidate actually completed.
+- Do not ask all questions from one topic.
+- Inspect previous questions before selecting the next topic.
+- If fewer than 4 different topics have been covered, prefer an uncovered
+  completed curriculum topic.
+- After 4 different topics are covered, use intelligent follow-ups and
+  deeper probing based on answer quality.
+
 Rules:
 
 1. Ask exactly ONE question.
 2. Make it relevant to the candidate's actual experience.
 3. Use the candidate's completed missions and learning history.
 4. Use the provided curriculum.
-5. Consider previous candidate answers.
+5. Consider all previous interview questions and answers.
 6. Ask a follow-up when the previous answer needs deeper investigation.
 7. Test engineering reasoning and practical understanding.
 8. Prefer realistic engineering scenarios over definitions.
 9. Never repeat an already asked question.
-10. Gradually increase or decrease difficulty based on answer quality.
+10. Increase or decrease difficulty based on demonstrated answer quality.
 11. If the previous answer was weak or incorrect, probe the same concept
     from a different practical angle.
 12. If the previous answer was strong, increase the difficulty.
-13. Cover different curriculum areas across the interview.
-14. Keep the question conversational.
-15. Return ONLY the interview question.
+13. Ensure at least 4 distinct curriculum days/topics by question 8.
+14. Prefer topics supported by completed missions.
+15. Avoid skipped or failed topics unless necessary.
+16. Test practical decisions, trade-offs, debugging, architecture,
+    implementation, failure handling, or engineering reasoning.
+17. Keep the question conversational.
+18. Return ONLY the interview question.
+19. Do not return numbering, labels, explanations, markdown, or JSON.
 """
-
     return call_gemini(prompt)
-
 
 # =========================================================
 # GEMINI — FINAL EVALUATION
@@ -206,8 +221,7 @@ def generate_final_evaluation(candidate, questions, answers):
     prompt = f"""
 You are a STRICT senior technical interviewer.
 
-You must evaluate the candidate ONLY from the evidence contained
-in the candidate's actual answers.
+Evaluate the candidate ONLY from the candidate's actual interview answers.
 
 Candidate:
 {json.dumps(candidate, indent=2)}
@@ -215,98 +229,70 @@ Candidate:
 Interview Q&A:
 {json.dumps(qa_pairs, indent=2)}
 
-IMPORTANT SCORING PHILOSOPHY:
+IMPORTANT:
+The candidate profile, resume, education, missions, job title, expected skills,
+and previous experience are NOT evidence of knowledge.
 
-The candidate's profile, resume, missions, education, and expected
-skills are NOT proof that the candidate knows something.
+ONLY demonstrated evidence in the actual answers counts.
 
-Only what the candidate actually demonstrated in their answers
-counts toward the score.
+For EACH question, internally judge the answer before calculating the final scores.
 
-Do NOT give credit simply because:
-- the candidate's resume says they worked on something
-- the question was related to a known skill
-- the candidate used technical buzzwords
-- the candidate sounded confident
-- the candidate gave a vague answer
-- the candidate repeated terminology from the question
+For each answer determine:
+- correctness
+- depth of understanding
+- reasoning quality
+- practical understanding
+- technical mistakes
+- relevance to the question
 
-If an answer is irrelevant, nonsensical, extremely short, evasive,
-or demonstrates no understanding, score that answer very low.
-
-If an answer is partially correct, give only partial credit.
-
-If the candidate makes an important technical mistake, explicitly
-consider that a weakness.
-
-If the candidate provides concrete architecture, reasoning,
-trade-offs, implementation details, failure handling, examples,
-or debugging methodology, reward that evidence.
-
-SCORING:
+Answer quality:
+- Fully correct and deeply explained = high credit
+- Correct but incomplete = partial/high credit
+- Partially correct = partial credit
+- Mostly incorrect = low credit
+- Incorrect, irrelevant, evasive, nonsensical, or no meaningful answer = very low credit
 
 Technical Knowledge:
-- Measures correctness and depth of technical understanding.
-- Do not reward unsupported claims.
-- Definitions without understanding receive limited credit.
+Measure actual technical correctness and depth.
+Do not reward buzzwords or confident claims without explanation.
 
 Problem Solving:
-- Measures reasoning, diagnosis, trade-offs, edge cases,
-  and ability to design practical solutions.
-- A memorized definition is not strong problem solving.
+Measure reasoning, diagnosis, trade-offs, edge cases, architecture,
+implementation decisions, debugging, and failure handling.
+Definitions alone are not strong problem solving.
 
 Communication:
-- Measures clarity, structure, relevance, and ability to explain
-  technical ideas.
-- Fluent but technically wrong answers must NOT receive a high score.
+Measure clarity, structure, relevance, and ability to explain.
+Fluent but technically incorrect answers must still receive low scores.
 
-Overall Score:
-- Must reflect the actual quality of the complete interview.
+OVERALL SCORE CALIBRATION:
+
+0-20: Almost no usable understanding.
+21-40: Mostly incorrect or extremely shallow.
+41-60: Basic understanding with major gaps.
+61-70: Moderate competence with significant weaknesses.
+71-75: Reasonably strong but noticeable gaps.
+76-85: Strong performance with moderate gaps.
+86-95: Very strong performance with deep reasoning.
+96-100: Exceptional and consistently excellent.
+
+STRICT ANTI-INFLATION RULES:
+
 - Do NOT default to 80.
-- Do NOT inflate scores.
-- If most answers are poor, the overall score must be poor.
-- If answers are mixed, the score must reflect that.
-- Strong scores require strong evidence across multiple answers.
-
-ROUGH SCORE GUIDANCE:
-
-0-20:
-Almost no usable technical understanding.
-
-21-40:
-Major knowledge gaps. Mostly incorrect, irrelevant, or shallow answers.
-
-41-60:
-Basic understanding but significant gaps and weak practical reasoning.
-
-61-75:
-Reasonably competent with noticeable gaps.
-
-76-85:
-Strong technical performance with only moderate gaps.
-
-86-95:
-Very strong performance with deep reasoning and practical understanding.
-
-96-100:
-Exceptional performance. Reserve this for consistently excellent
-answers with strong depth and very few weaknesses.
-
-ANTI-INFLATION RULE:
-
-If several answers are irrelevant, nonsense, or demonstrate
-little understanding, the overall score MUST be below 60.
-
-If approximately half of the answers demonstrate weak understanding,
-the overall score should generally fall around 40-65 depending on
-the quality of the remaining answers.
-
-Do not give an overall score above 75 unless the candidate has
-provided substantial evidence of competence.
+- Do NOT give a high score because some answers are strong.
+- Several weak answers must materially lower the final score.
+- If approximately half the answers are weak, overallScore should generally be 40-65.
+- If several answers are clearly incorrect, overallScore should generally be below 70.
+- Do NOT give overallScore above 75 unless the majority of answers provide substantial evidence of competence.
+- Do NOT give overallScore above 85 unless the candidate demonstrates strong correctness,
+  reasoning, and practical depth across multiple answers.
+- One excellent answer must NOT compensate for several poor answers.
+- Important technical mistakes must be reflected in weaknesses and scores.
+- The final score must represent the complete interview, not the candidate's potential.
 
 Return ONLY valid JSON.
 
-Use exactly this structure:
+Use exactly:
 
 {{
     "overallScore": 0,
@@ -320,21 +306,15 @@ Use exactly this structure:
 }}
 
 Additional rules:
-
 - All scores must be integers from 0 to 100.
-- strengths must contain only evidence demonstrated in answers.
-- weaknesses must identify actual gaps demonstrated in answers.
+- strengths must contain only demonstrated evidence.
+- weaknesses must contain actual demonstrated gaps or mistakes.
 - Do not invent experience.
-- Do not claim the candidate knows something they did not demonstrate.
-- Keep strengths concise.
-- Keep weaknesses concise.
-- summary must accurately describe the interview performance.
-- Recommendation must be exactly one of:
-
-"Strong Hire"
-"Hire"
-"Consider"
-"No Hire"
+- Do not claim knowledge that was not demonstrated.
+- Keep strengths and weaknesses concise.
+- Recommendation must be exactly:
+  "Strong Hire", "Hire", "Consider", or "No Hire".
+- The summary must accurately describe the complete interview.
 """
 
     try:

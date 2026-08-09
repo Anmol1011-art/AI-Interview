@@ -6,12 +6,23 @@ type Candidate = {
   member?: {
     id?: string
     name?: string
-    level?: string
+    jobRole?: string
+    yearsExperience?: number
+    education?: string
+    status?: string
   }
-  progress?: number
-  completedDays?: number
-  completedAreas?: string[]
-  focusAreas?: string[]
+  missions?: {
+    day: number
+    title: string
+    passed?: boolean
+    skipped?: boolean
+    attempts?: number
+  }[]
+  signals?: {
+    commitDays?: number
+    missionsCompleted?: number
+    missionsFirstTry?: number
+  }
 }
 
 export const Route = createFileRoute("/candidates")({
@@ -41,8 +52,8 @@ function Candidates() {
 
   return (
     <main className="min-h-screen px-6 pb-20 pt-32">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-12">
+      <div className="mx-auto max-w-7xl">
+        <div>
           <div className="mono-label text-[var(--primary-glow)]">
             STEP 1 OF 3 · CANDIDATE SELECTION
           </div>
@@ -57,26 +68,45 @@ function Candidates() {
         </div>
 
         {loading && (
-          <div className="flex items-center gap-3 text-white/50">
+          <div className="mt-10 flex items-center gap-3 text-white/50">
             <Loader2 className="animate-spin" size={20} />
             Loading candidates...
           </div>
         )}
 
         {error && (
-          <div className="rounded-xl border border-red-400/20 bg-red-400/5 p-5 text-red-300">
+          <div className="mt-10 rounded-xl border border-red-400/20 bg-red-400/5 p-5 text-red-300">
             {error}
           </div>
         )}
 
         {!loading && !error && (
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="mt-10 grid gap-5 md:grid-cols-2">
             {candidates.map((candidate) => {
               const id = candidate.member?.id ?? ""
               const name = candidate.member?.name ?? "Candidate"
-              const level = candidate.member?.level ?? "AI Engineer"
-              const progress = candidate.progress ?? 0
-              const days = candidate.completedDays ?? 0
+              const level = candidate.member?.jobRole ?? "AI Engineer"
+
+              const days = candidate.signals?.commitDays ?? 0
+
+              const progress = Math.min(
+                100,
+                Math.round((days / 31) * 100)
+              )
+
+              const completedAreas =
+                candidate.missions
+                  ?.filter((mission) => mission.passed === true)
+                  .map((mission) => mission.title) ?? []
+
+              const focusAreas =
+                candidate.missions
+                  ?.filter(
+                    (mission) =>
+                      mission.passed !== true &&
+                      mission.skipped !== true
+                  )
+                  .map((mission) => mission.title) ?? []
 
               return (
                 <div
@@ -117,14 +147,14 @@ function Candidates() {
                     </div>
                   </div>
 
-                  {candidate.completedAreas?.length ? (
+                  {completedAreas.length > 0 && (
                     <div className="mt-6">
                       <div className="mono-label text-white/25">
                         COMPLETED AREAS
                       </div>
 
                       <div className="mt-3 flex flex-wrap gap-2">
-                        {candidate.completedAreas.map((area) => (
+                        {completedAreas.map((area) => (
                           <span
                             key={area}
                             className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-white/55"
@@ -134,16 +164,16 @@ function Candidates() {
                         ))}
                       </div>
                     </div>
-                  ) : null}
+                  )}
 
-                  {candidate.focusAreas?.length ? (
+                  {focusAreas.length > 0 && (
                     <div className="mt-5">
                       <div className="mono-label text-white/25">
                         FOCUS AREAS
                       </div>
 
                       <div className="mt-3 flex flex-wrap gap-2">
-                        {candidate.focusAreas.map((area) => (
+                        {focusAreas.map((area) => (
                           <span
                             key={area}
                             className="rounded-full border border-[var(--gold)]/20 bg-[var(--gold)]/5 px-3 py-1 text-xs text-[var(--gold)]"
@@ -153,7 +183,7 @@ function Candidates() {
                         ))}
                       </div>
                     </div>
-                  ) : null}
+                  )}
 
                   <Link
                     to="/interview"

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 import { Send, Loader2, BrainCircuit } from "lucide-react"
 
@@ -22,6 +22,7 @@ export const Route = createFileRoute("/interview")({
 
 function Interview() {
   const { candidate } = Route.useSearch()
+const navigate = useNavigate()
 
   const [sessionId] = useState(
     () => `session-${Date.now()}`
@@ -118,6 +119,20 @@ function Interview() {
 
       if (data.done) {
         setDone(true)
+
+    if (data.evaluation) {
+      sessionStorage.setItem(
+        `interview-evaluation-${sessionId}`,
+        JSON.stringify(data.evaluation)
+      )
+    }
+
+    navigate({
+      to: "/results",
+      search: {
+        sessionId,
+      },
+    })
       } else {
         setQuestionNumber((number) => number + 1)
       }

@@ -1,35 +1,67 @@
 # AI Usage Log
 
-This file documents the AI-assisted development process used to build the AI Interview Agent.
+## Project
+AI Interview Agent
 
-## Project Planning
-- Used AI assistance to understand the project requirements and convert them into an implementation plan.
-- Used AI to reason about the interview flow, candidate management, evaluation, scoring, and frontend/backend integration.
+## Overview
 
-## Backend Development
-- Used AI assistance to design and implement the FastAPI backend.
-- Used AI assistance for Gemini API integration and interview question generation.
-- Used AI assistance to design the final interview evaluation prompt.
-- Used AI assistance to improve evaluation so scores are based on demonstrated answers rather than candidate profile claims.
-- Used AI assistance to add error handling for Gemini API failures and quota errors.
+This project was developed using AI-assisted development. AI was used for
+architecture, backend implementation, frontend development, debugging,
+interview logic, evaluation logic, and iterative refinement.
 
-## Frontend Development
-- Used AI assistance to build and refine the candidate selection, interview, and results flows.
-- Used AI assistance to connect frontend API calls with the FastAPI backend.
-- Used AI assistance to debug interview submission and question-count behavior.
+## Key AI-Assisted Development Areas
 
-## Debugging
-- Used AI assistance to diagnose Gemini model availability and API quota errors.
-- Used AI assistance to debug interview answer submission failures and backend session handling.
-- Used AI assistance to validate the final project against the submission requirements.
+### 1. Project Architecture
+Designed the architecture for a personalized AI technical interview agent
+using FastAPI, React/TanStack, Gemini API, curriculum JSON, candidate JSON,
+and session-based interview context.
 
-## Evaluation Prompting
-The evaluation system was explicitly instructed to:
-- Evaluate only evidence demonstrated in candidate answers.
-- Avoid giving credit based only on resumes, profiles, or expected skills.
-- Penalize irrelevant, nonsensical, evasive, or technically incorrect answers.
-- Reward concrete reasoning, architecture, trade-offs, implementation details, and failure handling.
-- Avoid inflated scores and require strong evidence for high scores.
+### 2. Candidate Personalization
+Implemented interview generation using candidate profiles, completed
+curriculum missions, learning history, mission attempts, skipped topics,
+and previous interview questions and answers.
 
-## Human Direction
-AI was used as a development and debugging assistant. Product decisions, requirements, testing decisions, and final project direction were reviewed and directed by the project author.
+### 3. Adaptive Interview
+The interviewer adapts questions based on previous answers, avoids repetition,
+changes difficulty, and uses practical engineering scenarios.
+
+### 4. Interview Coverage
+The interview is constrained to exactly 8 questions and at least 4 different
+curriculum days/topics.
+
+### 5. Final Evaluation
+The final evaluation judges the candidate only from actual interview answers.
+It evaluates technical knowledge, problem solving, communication, correctness,
+depth, practical understanding, and engineering reasoning.
+
+### 6. Frontend
+AI assistance was used for the candidate selection, interview interface,
+results page, API integration, and error handling.
+
+### 7. Debugging
+AI assistance was used to diagnose backend, frontend, Gemini API,
+routing, build, and quota-related issues.
+
+## Important Design Decision
+
+Candidate profile information is used for interview personalization but is NOT
+treated as evidence of technical competence.
+
+Only demonstrated interview answers contribute to the final evaluation.
+
+## Known Limitation
+
+The application depends on Gemini API quota. When the quota is exhausted,
+the backend returns a graceful error response.
+
+## Requirements Implemented
+
+- Conversational multi-turn interview
+- Candidate-specific questions
+- Interview session context
+- Adaptive follow-up questions
+- Exactly 8 interview questions
+- At least 4 curriculum topics
+- Structured final evaluation
+- FastAPI HTTP API
+- React/TanStack frontend

@@ -23,7 +23,7 @@ export type InterviewResponse = {
 }
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"
+  import.meta.env.VITE_API_BASE_URL || "https://bookish-succotash-x5qj7p5rjq5qh9669-8000.app.github.dev"
 
 export async function getCandidates(): Promise<Candidate[]> {
   const response = await fetch(`${API_BASE_URL}/api/candidates`)
