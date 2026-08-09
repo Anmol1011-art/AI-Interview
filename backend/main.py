@@ -50,8 +50,8 @@ app.add_middleware(
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-CURRICULUM_PATH = BASE_DIR / "data" / "curriculum.json"
-CANDIDATES_PATH = BASE_DIR / "data" / "candidates.json"
+CURRICULUM_PATH = Path(__file__).resolve().parent / "curriculum.json"
+CANDIDATES_PATH = Path(__file__).resolve().parent / "candidates.json"
 
 
 # =========================================================
