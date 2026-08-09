@@ -35,7 +35,7 @@ const navigate = useNavigate()
   const [done, setDone] = useState(false)
   const [questionNumber, setQuestionNumber] = useState(1)
 
-  const apiUrl = ""
+  const apiUrl = import.meta.env.VITE_API_BASE_URL
 
   useEffect(() => {
     startInterview()
